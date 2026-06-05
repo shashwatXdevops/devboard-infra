@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package summarizer;
+
+// The AI Summarization service definition.
+// Facilitates high-speed gRPC communication between the FastAPI Core Backend and the Python AI Service.
+service Summarizer {
+  // Analyzes and summarizes task descriptions, nested markdown, or unstructured documents.
+  rpc SummarizeTask (SummarizeRequest) returns (SummarizeResponse) {}
+  
+  // Optional streaming endpoint for real-time AI response streaming.
+  rpc StreamSummarizeTask (SummarizeRequest) returns (stream SummarizeResponse) {}
+}
+
+// The request message containing the raw text or markdown to be summarized.
+message SummarizeRequest {
+  string task_id = 1;         // Unique identifier for the task or document
+  string content = 2;         // The raw unstructured content or markdown
+  int32 max_length = 3;       // Optional: Target max length for the summary
+  string tone = 4;            // Optional: Tone of the summary (e.g., "professional", "concise")
+}
+
+// The response message containing the summarized output.
+message SummarizeResponse {
+  string task_id = 1;         // Unique identifier echoing the request
+  string summary = 2;         // The generated markdown summary
+  string model_version = 3;   // Metadata: e.g., "ollama-llama3" or "openai-gpt4"
+  float processing_time_ms = 4; // Metadata: Pipeline execution time
+}
