@@ -1,0 +1,104 @@
+version: '3.8'
+
+services:
+  # ----------------------------------------------------
+  # DATABASE TIER
+  # ----------------------------------------------------
+  postgres:
+    image: postgres:15-alpine
+    container_name: devboard_postgres
+    environment:
+      POSTGRES_USER: devboard_admin
+      POSTGRES_PASSWORD: secure_devboard_pass
+      POSTGRES_DB: devboard_core
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - devboard_net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U devboard_admin -d devboard_core"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  mongodb:
+    image: mongo:6-jammy
+    container_name: devboard_mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: devboard_admin
+      MONGO_INITDB_ROOT_PASSWORD: secure_devboard_pass
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - devboard_net
+
+  # ----------------------------------------------------
+  # LOGICAL TIER
+  # ----------------------------------------------------
+  core-backend:
+    build:
+      context: ./core-backend
+      dockerfile: Dockerfile
+    container_name: devboard_core_backend
+    environment:
+      # PostgreSQL Connection
+      - DATABASE_URL=postgresql://devboard_admin:secure_devboard_pass@postgres:5432/devboard_core
+      # MongoDB Connection
+      - MONGO_URL=mongodb://devboard_admin:secure_devboard_pass@mongodb:27017/?authSource=admin
+      # JWT Settings
+      - JWT_SECRET_KEY=super_secret_devboard_key_123
+      - JWT_ALGORITHM=HS256
+      # gRPC connection to AI Service
+      - AI_SERVICE_HOST=ai-services
+      - AI_SERVICE_PORT=50051
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mongodb:
+        condition: service_started
+      ai-services:
+        condition: service_started
+    networks:
+      - devboard_net
+
+  # ----------------------------------------------------
+  # AI TIER
+  # ----------------------------------------------------
+  ai-services:
+    build:
+      context: ./ai-services
+      dockerfile: Dockerfile
+    container_name: devboard_ai_service
+    ports:
+      - "50051:50051"
+    networks:
+      - devboard_net
+
+  # ----------------------------------------------------
+  # PRESENTATION TIER
+  # ----------------------------------------------------
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: devboard_frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - core-backend
+    networks:
+      - devboard_net
+
+networks:
+  devboard_net:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  mongodb_data:
