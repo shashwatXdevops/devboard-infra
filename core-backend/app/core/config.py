@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     
     # MongoDB Configuration
     MONGO_URL: str = "mongodb://devboard_admin:secure_devboard_pass@localhost:27017/?authSource=admin"
+    MONGO_DB: str = "devboard_core"
 
     @property
     def mongo_database_uri(self) -> str:
