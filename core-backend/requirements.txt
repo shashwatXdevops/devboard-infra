@@ -9,3 +9,4 @@ grpcio-tools
 passlib[bcrypt]
 pydantic-settings
 email-validator
+python-multipart
