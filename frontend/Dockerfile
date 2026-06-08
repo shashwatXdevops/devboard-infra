@@ -21,6 +21,9 @@ FROM nginx:alpine
 # Copy the built assets to Nginx's document root
 COPY --from=build /app/dist /usr/share/nginx/html
 
+# Inject custom Nginx configuration for proxying /api to FastAPI
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
 # Expose port 80
 EXPOSE 80
 
