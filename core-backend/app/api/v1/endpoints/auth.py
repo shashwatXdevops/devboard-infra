@@ -8,6 +8,7 @@ from app.core.security import verify_password, create_access_token, get_password
 from app.db.postgres import get_pg_session
 from app.db.models.user import User
 from app.schemas.user import UserCreate, User as UserSchema
+from app.api.dependencies import get_current_active_user
 
 router = APIRouter()
 
@@ -48,3 +49,10 @@ def register_user(
     db.commit()
     db.refresh(user)
     return user
+
+@router.get("/me", response_model=UserSchema)
+def read_user_me(
+    current_user: User = Depends(get_current_active_user)
+):
+    """Get current user profile."""
+    return current_user

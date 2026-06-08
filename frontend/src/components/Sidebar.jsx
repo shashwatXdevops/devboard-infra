@@ -1,8 +1,28 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import { LayoutDashboard, KanbanSquare, BrainCircuit, Settings } from 'lucide-react';
+import api from '../api';
 
 const Sidebar = () => {
+  const [profileName, setProfileName] = useState('Loading...');
+  const [avatarChar, setAvatarChar] = useState('');
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        // Fetch the active user's profile from the backend
+        const response = await api.get('/auth/me');
+        const fullName = response.data.full_name || 'User';
+        setProfileName(fullName);
+        setAvatarChar(fullName.charAt(0).toUpperCase());
+      } catch (err) {
+        setProfileName('Offline');
+        setAvatarChar('?');
+      }
+    };
+    fetchProfile();
+  }, []);
+
   const navItems = [
     { name: 'Dashboard', path: '/', icon: <LayoutDashboard size={20} /> },
     { name: 'Task Board', path: '/board', icon: <KanbanSquare size={20} /> },
@@ -29,8 +49,8 @@ const Sidebar = () => {
       </nav>
       <div className="sidebar-footer">
         <div className="user-profile">
-          <div className="avatar">A</div>
-          <span>Admin</span>
+          <div className="avatar">{avatarChar}</div>
+          <span>{profileName}</span>
         </div>
       </div>
     </aside>
