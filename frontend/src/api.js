@@ -1,19 +1,33 @@
-// Setup placeholder for API calls to the backend
-const API_BASE_URL = '/api';
+import axios from 'axios';
 
-export const fetchTasks = async () => {
-    // Placeholder implementation
-    return [
-        { id: 1, title: 'Setup Backend Server', status: 'In Progress' },
-        { id: 2, title: 'Database Schema Design', status: 'Completed' },
-        { id: 3, title: 'Configure CI/CD Pipeline', status: 'Pending' },
-    ];
-};
+// The Nginx container proxies /api to the core-backend container
+const api = axios.create({
+  baseURL: '/api/v1',
+});
 
-export const fetchAISummaries = async () => {
-    // Placeholder implementation
-    return [
-        { id: 1, text: 'The backend development is progressing well. Consider optimizing the database queries for the user endpoints.', date: '2026-06-05' },
-        { id: 2, text: 'Frontend UI design looks promising. Ensure responsive layouts for mobile devices.', date: '2026-06-04' },
-    ];
-};
+// Interceptor to inject the JWT token automatically
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+// Unified Error handler (e.g., catching 401 Unauthorized)
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      // Clear token and redirect to login if token is expired/invalid
+      localStorage.removeItem('token');
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
+
+export default api;
