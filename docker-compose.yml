@@ -75,8 +75,6 @@ services:
       context: ./ai-services
       dockerfile: Dockerfile
     container_name: devboard_ai_service
-    ports:
-      - "50051:50051"
     networks:
       - devboard_net
 
