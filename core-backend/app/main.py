@@ -7,10 +7,15 @@ from app.db.mongo import connect_to_mongo, close_mongo_connection
 # When routers are built, import them here:
 from app.api.v1.router import api_router
 
+from app.db.postgres import Base, engine
+from app.db.models.user import User  # Crucial to import the model before create_all
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup Events: Connect to MongoDB
     await connect_to_mongo()
+    # Startup Events: Create PostgreSQL Tables
+    Base.metadata.create_all(bind=engine)
     yield
     # Shutdown Events: Close MongoDB connection
     await close_mongo_connection()
