@@ -6,3 +6,6 @@ motor
 PyJWT
 grpcio
 grpcio-tools
+passlib[bcrypt]
+pydantic-settings
+email-validator
