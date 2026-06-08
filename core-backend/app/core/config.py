@@ -5,26 +5,18 @@ class Settings(BaseSettings):
     API_V1_STR: str = "/api/v1"
     
     # PostgreSQL Configuration
-    PG_HOST: str = "localhost"
-    PG_PORT: str = "5432"
-    PG_USER: str = "devboard_admin"
-    PG_PASSWORD: str = "secure_devboard_pass"
-    PG_DB: str = "devboard_core"
+    DATABASE_URL: str = "postgresql://devboard_admin:secure_devboard_pass@localhost:5432/devboard_core"
     
     @property
     def sqlalchemy_database_uri(self) -> str:
-        return f"postgresql://{self.PG_USER}:{self.PG_PASSWORD}@{self.PG_HOST}:{self.PG_PORT}/{self.PG_DB}"
+        return self.DATABASE_URL
     
     # MongoDB Configuration
-    MONGO_HOST: str = "localhost"
-    MONGO_PORT: str = "27017"
-    MONGO_USER: str = "devboard_admin"
-    MONGO_PASSWORD: str = "secure_devboard_pass"
-    MONGO_DB: str = "devboard_core"
+    MONGO_URL: str = "mongodb://devboard_admin:secure_devboard_pass@localhost:27017/?authSource=admin"
 
     @property
     def mongo_database_uri(self) -> str:
-        return f"mongodb://{self.MONGO_USER}:{self.MONGO_PASSWORD}@{self.MONGO_HOST}:{self.MONGO_PORT}/?authSource=admin"
+        return self.MONGO_URL
 
     # JWT Configuration
     SECRET_KEY: str = "super_secret_devboard_key_123"
