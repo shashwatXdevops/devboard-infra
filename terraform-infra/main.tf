@@ -42,3 +42,15 @@ module "my_compute" {
 
     subnet_id = module.my_network.subnet_id
 }
+
+# 4. Call Compute Module again for the Worker Node!
+module "my_worker_node" {
+  source              = "./module/compute"
+  resource_group_name = azurerm_resource_group.rg.name
+  location            = azurerm_resource_group.rg.location
+  
+  # Notice how we just change the name!
+  vm_name             = "devboard-k3s-worker-1"
+  
+  subnet_id           = module.my_network.subnet_id
+}
