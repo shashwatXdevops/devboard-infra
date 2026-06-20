@@ -1,0 +1,56 @@
+name: Build and Publish Docker Images
+
+# Trigger this workflow automatically on every push to the main branch
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch: # Allows manual trigger from the GitHub UI
+
+env:
+  REGISTRY: ghcr.io
+  # Converts the repository owner to lowercase (GHCR requirement)
+  OWNER: ${{ github.repository_owner }}
+
+jobs:
+  build-and-push-images:
+    runs-on: ubuntu-latest
+    
+    # We need permission to push to the GitHub Packages registry
+    permissions:
+      contents: read
+      packages: write
+
+    # The Matrix Strategy allows us to build all three containers simultaneously!
+    strategy:
+      matrix:
+        service: [frontend, core-backend, ai-services]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Downcase the repository owner name safely
+      - name: Downcase Owner Name
+        id: downcase
+        run: echo "owner=${OWNER,,}" >> $GITHUB_OUTPUT
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          # The context is the specific folder for each microservice
+          context: ./${{ matrix.service }}
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ steps.downcase.outputs.owner }}/devboard-${{ matrix.service }}:latest
+          # Use local caching to speed up future pipeline runs
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
