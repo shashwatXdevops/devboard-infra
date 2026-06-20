@@ -64,7 +64,7 @@ module "github_runner" {
   vm_name             = "github-runner-vm"
   
   # Override the default size to use the Free Tier!
-  vm_size             = "Standard_B1s"
+  vm_size             = ""Standard_A1_v2""
   
   subnet_id           = module.my_network.subnet_id
 }
