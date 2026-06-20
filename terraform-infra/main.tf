@@ -54,3 +54,17 @@ module "my_worker_node" {
   
   subnet_id           = module.my_network.subnet_id
 }
+
+# 5. Call Compute Module for the GitHub Runner
+module "github_runner" {
+  source              = "./module/compute"
+  resource_group_name = azurerm_resource_group.rg.name
+  location            = azurerm_resource_group.rg.location
+  
+  vm_name             = "github-runner-vm"
+  
+  # Override the default size to use the Free Tier!
+  vm_size             = "Standard_B1s"
+  
+  subnet_id           = module.my_network.subnet_id
+}

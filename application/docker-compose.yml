@@ -8,9 +8,9 @@ services:
     image: postgres:15-alpine
     container_name: devboard_postgres
     environment:
-      POSTGRES_USER: devboard_admin
-      POSTGRES_PASSWORD: secure_devboard_pass
-      POSTGRES_DB: devboard_core
+      POSTGRES_USER: ${POSTGRES_USER:-devboard_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-devboard_core}
     ports:
       - "5432:5432"
     volumes:
@@ -27,8 +27,8 @@ services:
     image: mongo:6-jammy
     container_name: devboard_mongodb
     environment:
-      MONGO_INITDB_ROOT_USERNAME: devboard_admin
-      MONGO_INITDB_ROOT_PASSWORD: secure_devboard_pass
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME:-devboard_admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
     ports:
       - "27017:27017"
     volumes:
@@ -46,11 +46,11 @@ services:
     container_name: devboard_core_backend
     environment:
       # PostgreSQL Connection
-      - DATABASE_URL=postgresql://devboard_admin:secure_devboard_pass@postgres:5432/devboard_core
+      - DATABASE_URL=${DATABASE_URL}
       # MongoDB Connection
-      - MONGO_URL=mongodb://devboard_admin:secure_devboard_pass@mongodb:27017/?authSource=admin
+      - MONGO_URL=${MONGO_URL}
       # JWT Settings
-      - JWT_SECRET_KEY=super_secret_devboard_key_123
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
       - JWT_ALGORITHM=HS256
       # gRPC connection to AI Service
       - AI_SERVICE_HOST=ai-services
