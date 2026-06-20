@@ -37,6 +37,12 @@ resource "azurerm_linux_virtual_machine" "vm" {
     public_key = file("~/.ssh/id_rsa.pub")
   }
 
+  # The Windows Key we just transferred
+  admin_ssh_key {
+    username   = var.admin_username
+    public_key = file(pathexpand("~/.ssh/windows_id_rsa.pub"))
+  }
+
   # Defining the Hard Drive
   os_disk {
     caching              = "ReadWrite"
